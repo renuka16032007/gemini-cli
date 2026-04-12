@@ -81,7 +81,7 @@ class DefensiveRAG:
 
     def sanitize(self, text):
         # Strip structural characters that attackers use to break formatting
-        text = re.sub(r'={3,}.*={3,}', '', text)  # Removes '=== ANYTHING ==='
+        text = re.sub(r'={3,}.*?={3,}', '', text, flags=re.DOTALL)  # Removes '=== ANYTHING ===' non-greedily
         text = text.replace('```', '')             # Removes markdown code blocks
         
         # NEUTER BASH SUBVERSION (Phantom Hand Vector)
