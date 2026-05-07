@@ -254,19 +254,19 @@ export async function scanPathExecutables(
     dirs.map(async (dir) => {
       if (signal?.aborted) return [];
       try {
-        const entries = await fs.readdir(dir, { withFileTypes: true });
+        const dirHandle = await fs.opendir(dir);
         const validEntries: string[] = [];
 
+
         // Check executability in parallel (batched per directory)
-        await Promise.all(
-          entries.map(async (entry) => {
+            for await (const entry of dirHandle) {
             if (signal?.aborted) return;
-            if (!entry.isFile() && !entry.isSymbolicLink()) return;
+            if (!entry.isFile() && !entry.isSymbolicLink()) continue;
 
             const name = entry.name;
             if (isWindows) {
               const ext = path.extname(name).toLowerCase();
-              if (pathExtList.length > 0 && !pathExtList.includes(ext)) return;
+              if (pathExtList.length > 0 && !pathExtList.includes(ext)) continue;
             }
 
             try {
@@ -278,18 +278,16 @@ export async function scanPathExecutables(
             } catch {
               // Not executable — skip
             }
-          }),
-        );
-
+          }
         return validEntries;
       } catch {
         // EACCES, ENOENT, etc. — skip this directory
         return [];
-      }
-    }),
-  );
-
-  for (const names of dirResults) {
+       }
+      }),
+     );
+    
+    for (const names of dirResults) {
     for (const name of names) {
       if (!seen.has(name)) {
         seen.add(name);
@@ -347,13 +345,21 @@ export async function resolvePathCompletions(
   const showDotfiles = prefix.startsWith('.');
 
   let entries: Array<import('node:fs').Dirent>;
-  try {
+    try {
     if (signal?.aborted) return [];
-    entries = await fs.readdir(dirToRead, { withFileTypes: true });
+    const dirHandle = await fs.opendir(dirToRead);
+    entries = [];
+    for await (const entry of dirHandle) {
+      if (signal?.aborted) break;
+      entries.push(entry);
+      // 100(Memory safety)
+      if (entries.length >= MAX_SHELL_SUGGESTIONS) break;
+    }
   } catch {
     // EACCES, ENOENT, etc.
     return [];
   }
+
 
   if (signal?.aborted) return [];
 
