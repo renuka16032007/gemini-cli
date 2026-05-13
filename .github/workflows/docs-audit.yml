@@ -25,15 +25,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 'Run Docs Audit with Gemini'
-        id: 'run_gemini'
-                uses: 'google-github-actions/run-gemini-cli@a3bf79042542528e91937b3a3a6fbc4967ee3c31'
-        env:
+      -name: 'Run Docs Audit with Gemini'
+       id: 'run_gemini'
+       uses: 'google-github-actions/run-gemini-cli@a3bf79042542528e91937b3a3a6fbc4967ee3c31'
+       env:
           GEMINI_CLI_TRUST_WORKSPACE: true
-        with:
-          gemini_api_key: '${{ secrets.GEMINI_API_KEY } 
-        prompt: |
+       with:
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+       prompt: |
             Activate the 'docs-writer' skill.
+            
 
             **Task:** Execute the docs audit procedure, as defined in your 'docs-auditing.md' reference.
             Provide a detailed summary of the changes you make.
