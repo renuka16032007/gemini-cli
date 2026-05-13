@@ -29,8 +29,9 @@ jobs:
         id: 'run_gemini'
         uses: 'google-github-actions/run-gemini-cli@a3bf79042542528e91937b3a3a6fbc4967ee3c31'
         with:
-          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          prompt: |
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}' 
+          GEMINI_CLI_TRUST_WORKSPACE: true
+        prompt: |
             Activate the 'docs-writer' skill.
 
             **Task:** Execute the docs audit procedure, as defined in your 'docs-auditing.md' reference.
